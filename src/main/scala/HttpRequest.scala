@@ -11,12 +11,12 @@ class HttpRequest(input: InputStream) {
   println(getRequestLine())
 
   // リクエストされているリソースのパスを返す(メソッド, パス, プロトコル)
-  private def getRequestLine(): (String, String, String) = {
+  private def getRequestLine(): (Option[String], Option[String], Option[String]) = {
     val requestLine = this.header match {
-      case None => ("", "", "")
+      case None => (None, None, None)
       case Some(header) =>
         val requestLine = header.split("\r\n")(0).split(" ")
-        (requestLine(0), requestLine(1), requestLine(2))
+        (Option(requestLine(0)), Option(requestLine(1)), Option(requestLine(2)))
     }
     requestLine
   }
