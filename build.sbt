@@ -2,7 +2,7 @@ ThisBuild / organization := "com.example"
 ThisBuild / scalaVersion := "2.13.3"
 ThisBuild / version      := "0.1.0-SNAPSHOT"
 
-lazy val akkaVersion = "$akka_version$"
+lazy val akkaVersion = "2.6.8"
 
 lazy val root = (project in file("."))
   .settings(
