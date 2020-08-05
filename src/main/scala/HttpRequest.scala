@@ -7,9 +7,19 @@ import java.io.InputStream
 class HttpRequest(input: InputStream) {
 
   private val header = readHeader(input)
+  val (_method, _path, _proto) = getRequestLine()
 
-  println(getRequestLine())
+  private val method = _method
+  private val path = _path
+  private val proto = _proto
 
+  def getRequestMethod(): Option[String] = {
+    this.method
+  }
+
+  def getRequestPath(): Option[String] = {
+    this.path
+  }
   // リクエストされているリソースのパスを返す(メソッド, パス, プロトコル)
   private def getRequestLine(): (Option[String], Option[String], Option[String]) = {
     val requestLine = this.header match {

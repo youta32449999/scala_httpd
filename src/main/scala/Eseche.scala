@@ -3,40 +3,18 @@ import java.net.{ServerSocket, Socket}
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Locale, TimeZone}
 
-import scala.util.{Failure, Success, Try}
+import akka.actor.{ActorSystem, Props}
 
 object Modoki01 extends App {
   private val DOCUMENT_ROOT = "./public"
 
   val server = new ServerSocket(9999)
-  val socket = server.accept()
+  val system = ActorSystem("system")
+  val serverActor = system.actorOf(Props[ServerActor], "serverActor")
 
-  val input = socket.getInputStream()
-
-
-  val path = getPath(input)
-  println(path)
-
-  val output = socket.getOutputStream()
-
-  // レスポンスヘッダを返す
-  writeLine(output, "HTTP/1.1 200 OK")
-  writeLine(output, "Date: " + getDataStringUtc())
-  writeLine(output, "Server: Modoki/0.1")
-  writeLine(output, "Connection: close")
-  writeLine(output, "Content-type: text/html")
-  writeLine(output, "")
-
-  // レスポンスボディを返す
-  try {
-    val fis = new FileInputStream(DOCUMENT_ROOT + path)
-    val content = readFile(fis)
-    println(content)
-    content.foreach(ch => output.write(ch))
-
-    socket.close()
-  } catch {
-    case e: Exception => println(e)
+  while(true){
+    val socket = server.accept()
+    serverActor ! Run(socket)
   }
 
   // Requestからpathを取得する
