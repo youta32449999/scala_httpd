@@ -13,26 +13,25 @@ class ServerActor extends Actor {
 
   override def receive: Receive = {
     case Run(socket: Socket) =>
+      // リクエストを処理
       val request = new HttpRequest(socket.getInputStream)
-
       val path = request.getRequestPath()
 
-      val output = socket.getOutputStream()
-
       // レスポンスヘッダを返す
-      writeLine(output, "HTTP/1.1 200 OK")
-      writeLine(output, "Date: " + getDataStringUtc())
-      writeLine(output, "Server: Modoki/0.1")
-      writeLine(output, "Connection: close")
-      writeLine(output, "Content-type: text/html")
-      writeLine(output, "")
+      val response = new HttpResponse(socket)
+      response.writeLine("HTTP/1.1 200 OK")
+      response.writeLine("Date: " + getDataStringUtc())
+      response.writeLine("Server: Eseche/0.1")
+      response.writeLine("Connection: close")
+      response.writeLine("Content-type: text/html")
+      response.writeLine("")
 
       // レスポンスボディを返す
       try {
         path.foreach(p => {
           val fis = new FileInputStream(DOCUMENT_ROOT + p)
           val content = readFile(fis)
-          content.foreach(ch => output.write(ch))
+          content.foreach(ch => response.write(ch))
         })
       } catch {
         case e: Exception => println(e)
@@ -59,21 +58,5 @@ class ServerActor extends Actor {
 
     df.setTimeZone(cal.getTimeZone())
     df.format(cal.getTime()) + " GMT"
-  }
-
-  // 1行の文字列を、バイト列としてOutputStreamに書き込む
-  def writeLine(output: OutputStream, line: String): Unit = {
-    line.toCharArray.toList
-    def pWriteLine(output: OutputStream, bytes: List[Char]): Unit = {
-      bytes match {
-        case Nil =>
-          output.write('\r')
-          output.write('\n')
-        case x::xs =>
-          output.write(x)
-          pWriteLine(output, xs)
-      }
-    }
-    pWriteLine(output, line.toCharArray.toList)
   }
 }
