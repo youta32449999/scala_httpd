@@ -5,7 +5,7 @@ import java.util.{Calendar, Locale, TimeZone}
 
 import akka.actor.{ActorSystem, Props}
 
-object Modoki01 extends App {
+object Eseche extends App {
   private val DOCUMENT_ROOT = "./public"
 
   val server = new ServerSocket(9999)

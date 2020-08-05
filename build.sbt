@@ -8,6 +8,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "scala_httpd",
     libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor" % akkaVersion,
       "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
       "org.scalatest" %% "scalatest" % "3.2.0"
     )
