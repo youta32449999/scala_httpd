@@ -33,10 +33,11 @@ class ServerActor extends Actor {
           val fis = new FileInputStream(DOCUMENT_ROOT + p)
           val content = readFile(fis)
           content.foreach(ch => output.write(ch))
-          socket.close()
         })
       } catch {
         case e: Exception => println(e)
+      } finally {
+        socket.close()
       }
 
     case msg => println(s"I cannot understand ${msg.toString}")
