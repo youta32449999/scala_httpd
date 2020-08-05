@@ -5,6 +5,8 @@ import java.util.{Calendar, Locale, TimeZone}
 
 import akka.actor.{ActorSystem, Props}
 
+import ServerActorMessage.Run
+
 object Eseche extends App {
   private val DOCUMENT_ROOT = "./public"
 

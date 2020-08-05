@@ -5,10 +5,14 @@ import java.util.{Calendar, Locale, TimeZone}
 
 import akka.actor.{Actor, ActorSystem, Props}
 
-// ソケットの処理依頼
-final case class Run(socket: Socket)
+object ServerActorMessage {
+  // ソケットの処理依頼
+  final case class Run(socket: Socket)
+}
 
 class ServerActor extends Actor {
+  import ServerActorMessage.Run
+
   private val DOCUMENT_ROOT = "./public"
 
   override def receive: Receive = {
