@@ -3,7 +3,7 @@ import java.net.Socket
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Locale, TimeZone}
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{Actor}
 
 object ServerActorMessage {
   // ソケットの処理依頼
