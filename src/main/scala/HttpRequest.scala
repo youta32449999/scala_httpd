@@ -7,19 +7,41 @@ import java.io.InputStream
 class HttpRequest(input: InputStream) {
 
   private val header = readHeader(input)
-  val (_method, _path, _proto) = getRequestLine()
-
-  private val method = _method
-  private val path = _path
-  private val proto = _proto
+  private val parsedHeader = parseHeader(header)
 
   def getRequestMethod(): Option[String] = {
-    this.method
+    parsedHeader.get("Method")
   }
 
   def getRequestPath(): Option[String] = {
-    this.path
+    parsedHeader.get("Path")
   }
+
+  // ヘッダーの内容をMapにして扱いやすくする
+  private def parseHeader(header: Option[String]): Map[String, String] = {
+    this.header.map(h => {
+      val lines = h.split("\r\n")
+      // リクエストラインの取得
+      val requestLines = lines(0).split(" ")
+      val requestLineMap = Map(
+        "Method" -> requestLines(0).trim,
+        "Path" -> requestLines(1).trim,
+        "Protocol" -> requestLines(2).trim
+      )
+
+      // ヘッダーの取得
+      val headerBodyMap = lines.tail.map(h => {
+        val headerLine = h.split(":", 2)
+        (headerLine(0).trim, headerLine(1).trim)
+      }).toMap
+
+      requestLineMap ++ headerBodyMap
+    }) match {
+      case None => Map()
+      case Some(m) => m
+    }
+  }
+
   // リクエストされているリソースのパスを返す(メソッド, パス, プロトコル)
   private def getRequestLine(): (Option[String], Option[String], Option[String]) = {
     val requestLine = this.header match {
