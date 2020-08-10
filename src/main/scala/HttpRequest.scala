@@ -7,7 +7,7 @@ import java.io.InputStream
 class HttpRequest(input: InputStream) {
 
   private val header = readHeader(input)
-  private val parsedHeader = parseHeader(header)
+  val parsedHeader = parseHeader(header)
 
   def getRequestMethod(): Option[String] = {
     parsedHeader.get("Method")
