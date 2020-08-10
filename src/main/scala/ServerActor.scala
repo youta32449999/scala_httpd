@@ -1,5 +1,5 @@
 import java.io.{FileInputStream, FileOutputStream, OutputStream}
-import java.net.Socket
+import java.net.{Socket, URLDecoder}
 import java.nio.file.{Files, Paths}
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Locale, TimeZone}
@@ -82,6 +82,33 @@ class ServerActor extends Actor {
 
                 case _ => println("match error")
               }
+            } else if(contentType.startsWith("application/x-www-form-urlencoded")){
+              request.parsedHeader.get("Content-Length").foreach(contentLength => {
+                val content = readAll(socket, contentLength.toInt)
+                val decodedContent = URLDecoder.decode(scala.io.Source.fromBytes(content).mkString, "utf-8")
+                val params = decodedContent.split("&").map(param => {
+                  val splitParam = param.split("=")
+                  if(splitParam.length == 1) (splitParam(0) -> "") else (splitParam(0) -> splitParam(1))
+                })
+                println(decodedContent)
+                val _POST = params.foldLeft(Map(): Map[String, Any])((acc, param) => {
+                  acc.get(param._1) match {
+                    case Some(t) =>
+                      t match {
+                        case v: Array[Any] => acc ++ Map(param._1 -> (v ++ Array(param._2)))
+                        case v: Any => acc ++ Map(param._1 -> Array(v, param._2))
+                      }
+                    case None => acc ++ Map(param._1 -> param._2)
+                  }
+                })
+                _POST.foreach(m => {
+                  println(m._1)
+                  m._2 match {
+                    case v: Array[Any] => println(v.toList)
+                    case v: Any => println(v)
+                  }
+                })
+              })
             }
           })
 
@@ -221,6 +248,15 @@ class ServerActor extends Actor {
       println("---------++++++++++++--------------")
       println(scala.io.Source.fromBytes(line).mkString)
       readAll(socket, contentLength, readLength + line.length)
+  }
+
+  def readAll(socket: Socket, contentLength: Int): Array[Byte] = {
+    val input = socket.getInputStream
+    def pReadAll(readBytes: Int, acc: Array[Byte]): Array[Byte] = input.read match {
+      case ch if(readBytes + 1 >= contentLength) => acc ++ Array(ch.toByte)
+      case ch => pReadAll(readBytes + 1, acc ++ Array(ch.toByte))
+    }
+    pReadAll(0, Array())
   }
 
   // boundaryまで入力を読み込む
